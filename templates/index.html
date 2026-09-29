@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>My Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff0f5; 
+            --calc-bg: #ffffff;
+            --primary-pink: #ffb7c5; 
+            --dark-pink: #ff8fab;
+            --accent-red: #e8365d; 
+            --text-dark: #5c4a52;
+            --text-mid: #7a3050;
+            --text-soft: #b06080;
+            --soft-pink: #ffe4e1;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; 
+            margin: 0;
+            padding: 20px; 
+            /* Keeps the cute polka dots! */
+            background-image: radial-gradient(var(--primary-pink) 10%, transparent 10%);
+            background-size: 20px 20px; 
+            position: relative; /* Needed for the background GIF */
+            overflow-x: hidden; 
+        }
+
+        /* ─── Transparent Full-Screen Background GIF ─── */
+        body::before {
+            content: "";
+            position: fixed; /* Keeps it in place even if you scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Points to your GIF in the static folder */
+            background-image: url("{{ url_for('static', filename='melodyy.gif') }}");
+            background-size: cover; /* Stretches GIF to fill the whole screen */
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15; /* Makes the GIF 15% visible (85% transparent) */
+            z-index: -1; /* Puts it behind everything else */
+            pointer-events: none; /* Ensures you can still click the calculator */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px; 
+        }
+
+        .melody-deco {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .bow {
+            display: inline-block;
+            font-size: 2.2rem;
+            animation: bobble 3s ease-in-out infinite;
+        }
+
+        @keyframes bobble {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.08); }
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--accent-red);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            margin: 0;
+            /* Adds a slight white glow to text so it stands out against the background */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        h1 span {
+            color: var(--text-mid);
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-soft);
+            font-weight: 700;
+            margin-top: 5px;
+            margin-bottom: 0;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .calculator {
+            position: relative; 
+            /* Adjust 'yung may decimal for transparency/opacity' */
+            background-color: rgba(255, 255, 255, 0.3); 
+            
+            /* 2. The magic "frosted glass" blur effect */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); /* For Safari browsers */
+            
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
+            width: 100%; 
+            max-width: 400px; 
+            border: 3px solid var(--primary-pink);
+        }
+
+        .tabs {
+            display: flex;
+            position: relative;
+            background: var(--soft-pink);
+            border-radius: 50px;
+            padding: 4px;
+            margin-bottom: 25px;
+        }
+
+        .tabs::before {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: var(--calc-bg);
+            border-radius: 50px;
+            transition: transform 0.4s cubic-bezier(0.5, 1.5, 0.4, 1); 
+            box-shadow: 0 2px 8px rgba(232, 54, 93, 0.15);
+            z-index: 1;
+        }
+
+        .tabs[data-active="arithmetic"]::before {
+            transform: translateX(100%);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-red);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #8c6a78;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--soft-pink);
+            border-radius: 12px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--dark-pink);
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .op-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .op-btn {
+            flex: 1;
+            background: var(--soft-pink);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 0;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--text-soft);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .op-btn.active {
+            background: var(--accent-red);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .arith-inputs {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .op-display {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent-red);
+            margin-top: 30px; 
+            flex-shrink: 0;
+        }
+
+        .base-label-small {
+            font-size: 0.75em;
+            margin-top: 8px;
+            margin-bottom: 3px;
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #e8365d, #ff6b9d);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.1s, box-shadow 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 8px 20px rgba(232, 54, 93, 0.3);
+        }
+
+        .calc-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(232, 54, 93, 0.4);
+        }
+
+        .calc-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff0f5;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-pink);
+            min-height: 30px;
+            border: 2px dashed var(--primary-pink);
+            /* Softens the text wrapping so it breaks at spaces first */
+            overflow-wrap: break-word;
+            word-break: normal;
+        }
+
+        /* Shrinks the text slightly when an error is triggered */
+        .result-box.error-text {
+            font-size: 1.1rem;
+            color: var(--accent-red);
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px; 
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .bow {
+                font-size: 1.8rem;
+            }
+            .subtitle {
+                font-size: 0.85rem;
+            }
+            .op-btn {
+                font-size: 1.1rem;
+                padding: 8px 0;
+            }
+            .op-display {
+                margin-top: 28px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+  <div class="melody-deco">
+    <span class="bow">🎀</span>
+    <h1>My<span>Base</span></h1>
+    <span class="bow" style="animation-delay:-1.5s">🌸</span>
+  </div>
+  <p class="subtitle">Number System Calculator · Digital Electronics</p>
+</header>
+
+<div class="calculator">
+    
+    <div class="tabs" id="mode-tabs" data-active="convert">
+        <button class="tab-btn active" onclick="setMode('convert')">🔄 Convert</button>
+        <button class="tab-btn" onclick="setMode('arithmetic')">➕ Arithmetic</button>
+    </div>
+    <input type="hidden" id="mode" value="convert">
+
+    <div id="convert-section">
+        <div class="input-group row">
+            <div style="flex: 2;">
+                <label>Number</label>
+                <input type="text" id="num1_conv" placeholder="e.g. 1011">
+            </div>
+            <div style="flex: 1;">
+                <label>Base</label>
+                <input type="number" id="base1_conv" value="2" min="2" max="36">
+            </div>
+        </div>
+    </div>
+
+    <div id="arithmetic-section" class="hidden">
+        <div class="input-group">
+            <label>Operation</label>
+            <div class="op-selector">
+                <button class="op-btn active" onclick="selectOp(this, '+')">＋</button>
+                <button class="op-btn" onclick="selectOp(this, '-')">−</button>
+                <button class="op-btn" onclick="selectOp(this, '*')">×</button>
+                <button class="op-btn" onclick="selectOp(this, '/')">÷</button>
+            </div>
+            <input type="hidden" id="operator" value="+">
+        </div>
+
+        <div class="arith-inputs">
+            <div style="flex: 1; min-width: 0;">
+                <label>Operand A</label>
+                <input type="text" id="num1_arith" placeholder="e.g. 1010">
+                <label class="base-label-small">Base A</label>
+                <input type="number" id="base1_arith" value="10" min="2" max="36" style="padding: 6px;">
+            </div>
+            
+            <div class="op-display" id="op-disp">＋</div>
+            
+            <div style="flex: 1; min-width: 0;">
+                <label>Operand B</label>
+                <input type="text" id="num2_arith" placeholder="e.g. 0110">
+                <label class="base-label-small">Base B</label>
+                <input type="number" id="base2_arith" value="10" min="2" max="36" style="padding: 6px;">
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group" style="margin-top: 20px;">
+        <label>Output Base</label>
+        <input type="number" id="out_base" value="10" min="2" max="36">
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate 🎀</button>
+
+    <div class="result-box" id="result">...</div>
+</div>
+
+<script>
+    function setMode(mode) {
+        document.getElementById('mode').value = mode;
+        
+        const tabs = document.getElementById('mode-tabs');
+        tabs.setAttribute('data-active', mode);
+        
+        const btns = tabs.querySelectorAll('.tab-btn');
+        btns[0].classList.toggle('active', mode === 'convert');
+        btns[1].classList.toggle('active', mode === 'arithmetic');
+
+        const convSection = document.getElementById('convert-section');
+        const arithSection = document.getElementById('arithmetic-section');
+        
+        if (mode === 'arithmetic') {
+            convSection.classList.add('hidden');
+            arithSection.classList.remove('hidden');
+        } else {
+            convSection.classList.remove('hidden');
+            arithSection.classList.add('hidden');
+        }
+    }
+
+    function selectOp(btn, op) {
+        document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        document.getElementById('operator').value = op;
+        document.getElementById('op-disp').innerText = btn.innerText;
+    }
+
+    async function calculate() {
+        const mode = document.getElementById('mode').value;
+        const out_base = document.getElementById('out_base').value;
+        
+        const payload = { mode, out_base };
+
+        if (mode === 'convert') {
+            payload.num1 = document.getElementById('num1_conv').value.toUpperCase();
+            payload.base1 = document.getElementById('base1_conv').value;
+        } else {
+            payload.num1 = document.getElementById('num1_arith').value.toUpperCase();
+            payload.base1 = document.getElementById('base1_arith').value;
+            payload.num2 = document.getElementById('num2_arith').value.toUpperCase();
+            payload.base2 = document.getElementById('base2_arith').value;
+            payload.operator = document.getElementById('operator').value;
+        }
+
+        const resBox = document.getElementById('result');
+        resBox.innerText = "Calculating...";
+
+        try {
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                resBox.innerText = data.result;
+                resBox.classList.remove('error-text'); // Normal big text
+            } else {
+                resBox.innerText = "Error: " + data.error;
+                resBox.classList.add('error-text'); // Smaller error text
+            }
+        } catch (error) {
+            resBox.innerText = "Server Error";
+            resBox.classList.add('error-text');
+        }
+    }
+</script>
+
+</body>
+</html>
