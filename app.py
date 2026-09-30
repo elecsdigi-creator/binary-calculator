@@ -1,124 +1,165 @@
-# Pulls in the Flask tools needed to run a web server, read incoming data, send JSON responses, and load your HTML file
 from flask import Flask, request, jsonify, render_template
 
-# Initializes the actual web application instance
 app = Flask(__name__)
 
 def to_decimal(val, base):
-    """Converts a string of a given base (with optional fractional part) to a decimal float."""
-    # Cleans the input by making it uppercase and removing stray spaces
+    """Converts a string of a given base to a decimal float, AND returns the step-by-step solution."""
     val = str(val).upper().strip()
-    is_negative = False
-    
-    # Checks if the number is negative, flags it, and temporarily removes the minus sign to do the math
-    if val.startswith('-'):
-        is_negative = True
+    is_negative = val.startswith('-')
+    if is_negative:
         val = val[1:]
         
-    # Checks for a decimal point. If found, splits the string into an integer part and a fractional part
-    if '.' in val:
-        int_part, frac_part = val.split('.', 1)
-    else:
-        int_part, frac_part = val, ""
-        
-    # Uses Python's built-in converter to translate the integer part from its original base into base-10
-    dec_val = float(int(int_part, base)) if int_part else 0.0
+    int_part, frac_part = val.split('.', 1) if '.' in val else (val, "")
     
-    # If there are decimal places, it loops through each character
-    if frac_part:
-        digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        for i, digit in enumerate(frac_part):
-            # Finds the character's value (e.g., 'A' = 10) and multiplies it by base^(-index), adding to the total
-            dec_val += digits.index(digit) * (base ** -(i + 1))
+    dec_val = 0.0
+    digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    poly_terms = []
+    
+    # Process Integer Part
+    if int_part:
+        for i, char in enumerate(reversed(int_part)):
+            val_num = digits.index(char)
+            dec_val += val_num * (base ** i)
+            poly_terms.append(f"({val_num} × {base}<sup>{i}</sup>)")
             
-    # Restores the negative sign if one was flagged earlier
-    return -dec_val if is_negative else dec_val
+    # Process Fractional Part
+    if frac_part:
+        for i, char in enumerate(frac_part):
+            val_num = digits.index(char)
+            dec_val += val_num * (base ** -(i + 1))
+            poly_terms.append(f"({val_num} × {base}<sup>-{(i + 1)}</sup>)")
+            
+    if is_negative: dec_val = -dec_val
+    
+    # Generate the solution string for this step
+    if base == 10:
+        step_str = f"🌸 <b>Operand {val} is already in Base 10.</b>"
+    else:
+        int_poly = " + ".join(reversed(poly_terms[:len(int_part)])) if int_part else "0"
+        frac_poly = " + ".join(poly_terms[len(int_part):]) if frac_part else ""
+        full_poly = int_poly + (" + " + frac_poly if frac_poly else "")
+        
+        step_str = f"🌸 <b>Convert {val} (Base {base}) to Base 10:</b><br>{full_poly} = {abs(dec_val)}"
+        if is_negative: step_str += f"<br><i>Apply negative sign:</i> {dec_val}"
+        
+    return dec_val, step_str
 
 def from_decimal(val, base, precision=8):
-    """Converts a decimal float to a string of the target base."""
+    """Converts a decimal float to a string of the target base, AND returns the step-by-step solution."""
     is_negative = val < 0
     val = abs(float(val))
     
-    # Splits the float back into whole and fractional pieces
+    if base == 10:
+        val_str = str(int(val)) if val.is_integer() else str(val)
+        res_str = ("-" if is_negative else "") + val_str
+        return res_str, "✨ <b>Target is Base 10. No further conversion needed.</b>"
+
     int_part = int(val)
     frac_part = val - int_part
-    
     digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
-    # 1. Handle Integer Part
+    steps = [f"✨ <b>Convert {val} (Base 10) to Base {base}:</b>"]
+    
+    # 1. Handle Integer Part (Repeated Division)
     if int_part == 0:
         res_int = "0"
+        steps.append("Integer part is 0.")
     else:
         res_int = ""
-        # Repeatedly divides the whole number by the target base, using the remainder to look up the correct character
-        while int_part > 0:
-            res_int = digits[int_part % base] + res_int
-            int_part //= base
+        temp_int = int_part
+        steps.append("<i>Integer Part (Repeated Division):</i>")
+        while temp_int > 0:
+            remainder = temp_int % base
+            res_int = digits[remainder] + res_int
+            steps.append(f"{temp_int} ÷ {base} = {temp_int // base} remainder {remainder} (→ <b>{digits[remainder]}</b>)")
+            temp_int //= base
             
-    # 2. Handle Fractional Part
+    # 2. Handle Fractional Part (Repeated Multiplication)
     res_frac = ""
-    # Repeatedly multiplies the fraction by the target base, plucking off the resulting whole numbers
-    while frac_part > 0 and len(res_frac) < precision:
-        frac_part *= base
-        digit_val = int(frac_part)
-        res_frac += digits[digit_val]
-        frac_part -= digit_val
+    if frac_part > 0:
+        steps.append("<br><i>Fractional Part (Repeated Multiplication):</i>")
+        temp_frac = frac_part
+        while temp_frac > 0 and len(res_frac) < precision:
+            old_frac = temp_frac
+            temp_frac *= base
+            digit_val = int(temp_frac)
+            res_frac += digits[digit_val]
+            steps.append(f"{old_frac} × {base} = {temp_frac} (→ <b>{digits[digit_val]}</b>)")
+            temp_frac -= digit_val
+            
+    result = res_int + ("." + res_frac if res_frac else "")
+    if is_negative:
+        result = "-" + result
+        steps.append(f"<br><i>Apply negative sign:</i> {result}")
         
-    # Glues the two halves together to build the final string
-    result = res_int
-    if res_frac:
-        result += "." + res_frac
-        
-    return "-" + result if is_negative else result
+    return result, "<br>".join(steps)
 
-# When someone visits the main page, this serves the My Melody frontend
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Creates the API endpoint that the JavaScript talks to when the user click the "Calculate" button
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    # Grabs the package of data (mode, numbers, bases) sent from the frontend
     data = request.json
     mode = data.get('mode')
     out_base = int(data.get('out_base', 10))
+    
+    solution_steps = []
 
     try:
         if mode == 'convert':
-            # Translates the single number to base-10, then runs it straight through from_decimal
             num1 = data.get('num1')
             base1 = int(data.get('base1'))
-            dec_val = to_decimal(num1, base1)
-            result = from_decimal(dec_val, out_base)
+            
+            # Step 1: Base X to Base 10
+            dec_val, step1 = to_decimal(num1, base1)
+            solution_steps.append(step1)
+            
+            # Step 2: Base 10 to Target Base
+            result, step2 = from_decimal(dec_val, out_base)
+            solution_steps.append("<br>" + step2)
             
         elif mode == 'arithmetic':
-            # Translates both operands to base-10 first
-            num1 = to_decimal(data.get('num1'), int(data.get('base1')))
-            num2 = to_decimal(data.get('num2'), int(data.get('base2')))
+            num1 = data.get('num1')
+            base1 = int(data.get('base1'))
+            num2 = data.get('num2')
+            base2 = int(data.get('base2'))
             op = data.get('operator')
 
-            # Performs standard Python addition, subtraction, multiplication, or division
-            if op == '+': ans = num1 + num2
-            elif op == '-': ans = num1 - num2
-            elif op == '*': ans = num1 * num2
-            elif op == '/': 
-                # A safety check that returns an error instead of crashing if a user tries to divide by zero
-                if num2 == 0:
-                    return jsonify({'success': False, 'error': 'Division by zero is undefined.'})
-                ans = num1 / num2 
+            # Step 1: Convert operands to Base 10
+            dec1, step1 = to_decimal(num1, base1)
+            dec2, step2 = to_decimal(num2, base2)
+            solution_steps.extend([step1, "<br>" + step2])
 
-            # Takes the mathematical answer and converts it to the requested output base
-            result = from_decimal(ans, out_base)
+            # Step 2: Perform Arithmetic
+            if op == '+': ans = dec1 + dec2
+            elif op == '-': ans = dec1 - dec2
+            elif op == '*': ans = dec1 * dec2
+            elif op == '/': 
+                if dec2 == 0:
+                    return jsonify({'success': False, 'error': 'Division by zero is undefined.'})
+                ans = dec1 / dec2 
+
+            # Clean up display of .0 for integers
+            display1 = int(dec1) if dec1.is_integer() else dec1
+            display2 = int(dec2) if dec2.is_integer() else dec2
+            display_ans = int(ans) if ans.is_integer() else ans
             
-        return jsonify({'success': True, 'result': result})
+            solution_steps.append(f"<br>🎀 <b>Perform Arithmetic (Base 10):</b><br>{display1} {op} {display2} = {display_ans}")
+
+            # Step 3: Base 10 to Target Base
+            result, step3 = from_decimal(ans, out_base)
+            solution_steps.append("<br>" + step3)
+            
+        # Join all HTML steps and send back
+        final_solution_html = "<br>".join(solution_steps)
+        return jsonify({'success': True, 'result': result, 'steps': final_solution_html})
+        
     except ValueError:
-        # If a user types an invalid character (like 'A' in Binary), this catches the internal crash and sends a friendly error
         return jsonify({'success': False, 'error': 'Invalid number character for the selected base.'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-# A Python rule that means "only run the server if I run this file directly"
-# When deployed to Render, Gunicorn ignores this line and takes over the hosting itself
 if __name__ == '__main__':
     app.run(debug=True)

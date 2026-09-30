@@ -49,14 +49,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Points to your GIF in the static folder */
+            /* Points to GIF in the static folder */
             background-image: url("{{ url_for('static', filename='melodyy.gif') }}");
             background-size: cover; /* Stretches GIF to fill the whole screen */
             background-position: center;
             background-repeat: no-repeat;
             opacity: 0.15; /* Makes the GIF 15% visible (85% transparent) */
             z-index: -1; /* Puts it behind everything else */
-            pointer-events: none; /* Ensures you can still click the calculator */
+            pointer-events: none; /* Ensures can still click the calculator */
         }
 
         header {
@@ -305,6 +305,26 @@
 
         .hidden { display: none; }
 
+        .solution-box {
+            margin-top: 15px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            text-align: left; /* Left align for math steps */
+            border: 2px solid var(--soft-pink);
+            line-height: 1.6;
+            display: none; /* Hidden by default */
+            box-shadow: inset 0 0 10px rgba(255, 183, 197, 0.2);
+        }
+        .solution-box.active {
+            display: block; /* Shown when calculation is done */
+        }
+        .solution-box b {
+            color: var(--accent-red);
+        }
+
         @media (max-width: 480px) {
             .calculator {
                 padding: 20px; 
@@ -400,6 +420,7 @@
     <button class="calc-btn" onclick="calculate()">Calculate 🎀</button>
 
     <div class="result-box" id="result">...</div>
+    <div class="solution-box" id="solution"></div>
 </div>
 
 <script>
@@ -451,7 +472,10 @@
         }
 
         const resBox = document.getElementById('result');
+        const solBox = document.getElementById('solution');
+        
         resBox.innerText = "Calculating...";
+        solBox.classList.remove('active'); // Hide solution box while thinking
 
         try {
             const response = await fetch('/calculate', {
@@ -463,10 +487,14 @@
             
             if (data.success) {
                 resBox.innerText = data.result;
-                resBox.classList.remove('error-text'); // Normal big text
+                resBox.classList.remove('error-text'); 
+                
+                // Inject the generated HTML steps and show the box
+                solBox.innerHTML = data.steps; 
+                solBox.classList.add('active'); 
             } else {
                 resBox.innerText = "Error: " + data.error;
-                resBox.classList.add('error-text'); // Smaller error text
+                resBox.classList.add('error-text'); 
             }
         } catch (error) {
             resBox.innerText = "Server Error";
