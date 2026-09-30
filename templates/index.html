@@ -34,29 +34,26 @@
             min-height: 100vh; 
             margin: 0;
             padding: 20px; 
-            /* Keeps the cute polka dots! */
             background-image: radial-gradient(var(--primary-pink) 10%, transparent 10%);
             background-size: 20px 20px; 
-            position: relative; /* Needed for the background GIF */
+            position: relative; 
             overflow-x: hidden; 
         }
 
-        /* ─── Transparent Full-Screen Background GIF ─── */
         body::before {
             content: "";
-            position: fixed; /* Keeps it in place even if you scroll */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Points to GIF in the static folder */
             background-image: url("{{ url_for('static', filename='melodyy.gif') }}");
-            background-size: cover; /* Stretches GIF to fill the whole screen */
+            background-size: cover; 
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.15; /* Makes the GIF 15% visible (85% transparent) */
-            z-index: -1; /* Puts it behind everything else */
-            pointer-events: none; /* Ensures can still click the calculator */
+            opacity: 0.15; 
+            z-index: -1; 
+            pointer-events: none; 
         }
 
         header {
@@ -94,7 +91,6 @@
             letter-spacing: -0.5px;
             line-height: 1.1;
             margin: 0;
-            /* Adds a slight white glow to text so it stands out against the background */
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
@@ -111,21 +107,28 @@
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
+        /* 1. App Container for layout */
+        .app-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 900px;
+        }
+
         .calculator {
             position: relative; 
-            /* Adjust 'yung may decimal for transparency/opacity' */
             background-color: rgba(255, 255, 255, 0.3); 
-            
-            /* 2. The magic "frosted glass" blur effect */
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px); /* For Safari browsers */
-            
+            -webkit-backdrop-filter: blur(8px); 
             padding: 30px;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
             width: 100%; 
             max-width: 400px; 
             border: 3px solid var(--primary-pink);
+            flex-shrink: 0; /* Prevents calculator from shrinking */
         }
 
         .tabs {
@@ -292,12 +295,10 @@
             color: var(--dark-pink);
             min-height: 30px;
             border: 2px dashed var(--primary-pink);
-            /* Softens the text wrapping so it breaks at spaces first */
             overflow-wrap: break-word;
             word-break: normal;
         }
 
-        /* Shrinks the text slightly when an error is triggered */
         .result-box.error-text {
             font-size: 1.1rem;
             color: var(--accent-red);
@@ -305,47 +306,59 @@
 
         .hidden { display: none; }
 
-        .solution-box {
-            margin-top: 15px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.85);
-            border-radius: 15px;
+        /* 2. The Sliding Solution Panel (Closed State) */
+        .solution-panel {
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.85); 
+            border-radius: 25px;
+            border: 0px solid var(--primary-pink);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+            box-shadow: none;
+        }
+
+        /* 3. When Active (Drawer Open State) */
+        .app-container.show-solution .solution-panel {
+            width: 400px;
+            opacity: 1;
+            padding: 30px;
+            border: 3px solid var(--primary-pink);
+            box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
+        }
+
+        /* 4. Locks text width so it doesn't "squish" during the animation */
+        .solution-content-wrapper {
+            width: 334px; 
             font-size: 0.95rem;
             color: var(--text-dark);
-            text-align: left; /* Left align for math steps */
-            border: 2px solid var(--soft-pink);
             line-height: 1.6;
-            display: none; /* Hidden by default */
-            box-shadow: inset 0 0 10px rgba(255, 183, 197, 0.2);
         }
-        .solution-box.active {
-            display: block; /* Shown when calculation is done */
-        }
-        .solution-box b {
+        
+        .solution-content-wrapper b {
             color: var(--accent-red);
         }
 
-        @media (max-width: 480px) {
-            .calculator {
-                padding: 20px; 
+        /* Mobile responsiveness updates */
+        @media (max-width: 850px) {
+            .app-container {
+                flex-direction: column;
+                align-items: center;
             }
-            h1 {
-                font-size: 2rem;
+            .app-container.show-solution .solution-panel {
+                width: 100%;
+                max-width: 400px;
+                margin-top: 10px;
             }
-            .bow {
-                font-size: 1.8rem;
+            .solution-content-wrapper {
+                width: 100%; 
             }
-            .subtitle {
-                font-size: 0.85rem;
-            }
-            .op-btn {
-                font-size: 1.1rem;
-                padding: 8px 0;
-            }
-            .op-display {
-                margin-top: 28px;
-                font-size: 1.3rem;
-            }
+            .calculator { padding: 20px; }
+            h1 { font-size: 2rem; }
+            .bow { font-size: 1.8rem; }
+            .subtitle { font-size: 0.85rem; }
+            .op-display { margin-top: 28px; font-size: 1.3rem; }
         }
     </style>
 </head>
@@ -360,67 +373,82 @@
   <p class="subtitle">Number System Calculator · Digital Electronics</p>
 </header>
 
-<div class="calculator">
+<div class="app-container" id="app-container">
     
-    <div class="tabs" id="mode-tabs" data-active="convert">
-        <button class="tab-btn active" onclick="setMode('convert')">🔄 Convert</button>
-        <button class="tab-btn" onclick="setMode('arithmetic')">➕ Arithmetic</button>
-    </div>
-    <input type="hidden" id="mode" value="convert">
+    <div class="calculator">
+        <div class="tabs" id="mode-tabs" data-active="convert">
+            <button class="tab-btn active" onclick="setMode('convert')">🔄 Convert</button>
+            <button class="tab-btn" onclick="setMode('arithmetic')">➕ Arithmetic</button>
+        </div>
+        <input type="hidden" id="mode" value="convert">
 
-    <div id="convert-section">
-        <div class="input-group row">
-            <div style="flex: 2;">
-                <label>Number</label>
-                <input type="text" id="num1_conv" placeholder="e.g. 1011">
+        <div id="convert-section">
+            <div class="input-group row">
+                <div style="flex: 2;">
+                    <label>Number</label>
+                    <input type="text" id="num1_conv" placeholder="e.g. 1011">
+                </div>
+                <div style="flex: 1;">
+                    <label>Base</label>
+                    <input type="number" id="base1_conv" value="2" min="2" max="36">
+                </div>
             </div>
-            <div style="flex: 1;">
-                <label>Base</label>
-                <input type="number" id="base1_conv" value="2" min="2" max="36">
+        </div>
+
+        <div id="arithmetic-section" class="hidden">
+            <div class="input-group">
+                <label>Operation</label>
+                <div class="op-selector">
+                    <button class="op-btn active" onclick="selectOp(this, '+')">＋</button>
+                    <button class="op-btn" onclick="selectOp(this, '-')">−</button>
+                    <button class="op-btn" onclick="selectOp(this, '*')">×</button>
+                    <button class="op-btn" onclick="selectOp(this, '/')">÷</button>
+                </div>
+                <input type="hidden" id="operator" value="+">
             </div>
+
+            <div class="arith-inputs">
+                <div style="flex: 1; min-width: 0;">
+                    <label>Operand A</label>
+                    <input type="text" id="num1_arith" placeholder="e.g. 1010">
+                    <label class="base-label-small">Base A</label>
+                    <input type="number" id="base1_arith" value="10" min="2" max="36" style="padding: 6px;">
+                </div>
+                
+                <div class="op-display" id="op-disp">＋</div>
+                
+                <div style="flex: 1; min-width: 0;">
+                    <label>Operand B</label>
+                    <input type="text" id="num2_arith" placeholder="e.g. 0110">
+                    <label class="base-label-small">Base B</label>
+                    <input type="number" id="base2_arith" value="10" min="2" max="36" style="padding: 6px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-top: 20px;">
+            <label>Output Base</label>
+            <input type="number" id="out_base" value="10" min="2" max="36">
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">Calculate 🎀</button>
+
+        <div class="result-box" id="result">...</div>
+
+        <!-- NEW TOGGLE BUTTON (Hidden by default) -->
+        <button id="toggle-sol-btn" class="calc-btn" onclick="toggleSolution()" style="display: none; background: var(--dark-pink); font-size: 1rem; margin-top: 15px; padding: 10px;">
+            See complete solution 🔍
+        </button>
+    </div>
+
+    <!-- NEW SLIDING SOLUTION PANEL -->
+    <div class="solution-panel">
+        <div class="solution-content-wrapper">
+            <h2 style="color: var(--accent-red); margin-top: 0; font-size: 1.5rem;">Steps</h2>
+            <div id="solution-content"></div>
         </div>
     </div>
 
-    <div id="arithmetic-section" class="hidden">
-        <div class="input-group">
-            <label>Operation</label>
-            <div class="op-selector">
-                <button class="op-btn active" onclick="selectOp(this, '+')">＋</button>
-                <button class="op-btn" onclick="selectOp(this, '-')">−</button>
-                <button class="op-btn" onclick="selectOp(this, '*')">×</button>
-                <button class="op-btn" onclick="selectOp(this, '/')">÷</button>
-            </div>
-            <input type="hidden" id="operator" value="+">
-        </div>
-
-        <div class="arith-inputs">
-            <div style="flex: 1; min-width: 0;">
-                <label>Operand A</label>
-                <input type="text" id="num1_arith" placeholder="e.g. 1010">
-                <label class="base-label-small">Base A</label>
-                <input type="number" id="base1_arith" value="10" min="2" max="36" style="padding: 6px;">
-            </div>
-            
-            <div class="op-display" id="op-disp">＋</div>
-            
-            <div style="flex: 1; min-width: 0;">
-                <label>Operand B</label>
-                <input type="text" id="num2_arith" placeholder="e.g. 0110">
-                <label class="base-label-small">Base B</label>
-                <input type="number" id="base2_arith" value="10" min="2" max="36" style="padding: 6px;">
-            </div>
-        </div>
-    </div>
-
-    <div class="input-group" style="margin-top: 20px;">
-        <label>Output Base</label>
-        <input type="number" id="out_base" value="10" min="2" max="36">
-    </div>
-
-    <button class="calc-btn" onclick="calculate()">Calculate 🎀</button>
-
-    <div class="result-box" id="result">...</div>
-    <div class="solution-box" id="solution"></div>
 </div>
 
 <script>
@@ -454,6 +482,20 @@
         document.getElementById('op-disp').innerText = btn.innerText;
     }
 
+    // Handles sliding the panel open and changing the button text
+    function toggleSolution() {
+        const appContainer = document.getElementById('app-container');
+        const btn = document.getElementById('toggle-sol-btn');
+        
+        appContainer.classList.toggle('show-solution');
+        
+        if (appContainer.classList.contains('show-solution')) {
+            btn.innerText = "Hide solution 🙈";
+        } else {
+            btn.innerText = "See complete solution 🔍";
+        }
+    }
+
     async function calculate() {
         const mode = document.getElementById('mode').value;
         const out_base = document.getElementById('out_base').value;
@@ -472,10 +514,16 @@
         }
 
         const resBox = document.getElementById('result');
-        const solBox = document.getElementById('solution');
+        const solContent = document.getElementById('solution-content');
+        const toggleBtn = document.getElementById('toggle-sol-btn');
+        const appContainer = document.getElementById('app-container');
         
         resBox.innerText = "Calculating...";
-        solBox.classList.remove('active'); // Hide solution box while thinking
+        
+        // Hide the toggle button and close the drawer if they calculate a new problem
+        toggleBtn.style.display = 'none';
+        appContainer.classList.remove('show-solution');
+        toggleBtn.innerText = "See complete solution 🔍";
 
         try {
             const response = await fetch('/calculate', {
@@ -489,9 +537,9 @@
                 resBox.innerText = data.result;
                 resBox.classList.remove('error-text'); 
                 
-                // Inject the generated HTML steps and show the box
-                solBox.innerHTML = data.steps; 
-                solBox.classList.add('active'); 
+                // Load the HTML steps into the hidden drawer and reveal the button
+                solContent.innerHTML = data.steps; 
+                toggleBtn.style.display = 'block'; 
             } else {
                 resBox.innerText = "Error: " + data.error;
                 resBox.classList.add('error-text'); 
