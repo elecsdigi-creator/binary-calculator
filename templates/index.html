@@ -19,9 +19,7 @@
             --soft-pink: #ffe4e1;
         }
 
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; }
         
         body {
             font-family: 'Quicksand', sans-serif;
@@ -43,10 +41,7 @@
         body::before {
             content: "";
             position: fixed; 
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("{{ url_for('static', filename='melodyy.gif') }}");
             background-size: cover; 
             background-position: center;
@@ -65,323 +60,134 @@
             margin-top: 20px; 
         }
 
-        .melody-deco {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 4px;
-        }
-
-        .bow {
-            display: inline-block;
-            font-size: 2.2rem;
-            animation: bobble 3s ease-in-out infinite;
-        }
-
+        .melody-deco { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 4px; }
+        .bow { display: inline-block; font-size: 2.2rem; animation: bobble 3s ease-in-out infinite; }
+        
         @keyframes bobble {
             0%, 100% { transform: rotate(-5deg) scale(1); }
             50% { transform: rotate(5deg) scale(1.08); }
         }
 
-        h1 {
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--accent-red);
-            letter-spacing: -0.5px;
-            line-height: 1.1;
-            margin: 0;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
+        h1 { font-size: 2.4rem; font-weight: 900; color: var(--accent-red); letter-spacing: -0.5px; line-height: 1.1; margin: 0; text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+        h1 span { color: var(--text-mid); }
+        .subtitle { font-size: 0.95rem; color: var(--text-soft); font-weight: 700; margin-top: 5px; margin-bottom: 0; text-shadow: 0 0 8px rgba(255, 255, 255, 0.8); }
 
-        h1 span {
-            color: var(--text-mid);
-        }
-
-        .subtitle {
-            font-size: 0.95rem;
-            color: var(--text-soft);
-            font-weight: 700;
-            margin-top: 5px;
-            margin-bottom: 0;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-        }
-
-        /* 1. App Container for layout */
         .app-container {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            align-items: flex-start;
-            width: 100%;
-            max-width: 900px;
+            display: flex; gap: 20px; justify-content: center; align-items: flex-start; width: 100%; max-width: 900px;
         }
 
         .calculator {
             position: relative; 
             background-color: rgba(255, 255, 255, 0.3); 
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px); 
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
-            width: 100%; 
-            max-width: 400px; 
-            border: 3px solid var(--primary-pink);
-            flex-shrink: 0; 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            padding: 30px; border-radius: 25px; box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
+            width: 100%; max-width: 400px; border: 3px solid var(--primary-pink); flex-shrink: 0; 
         }
 
-        .tabs {
-            display: flex;
-            position: relative;
-            background: var(--soft-pink);
-            border-radius: 50px;
-            padding: 4px;
-            margin-bottom: 25px;
-        }
-
+        .tabs { display: flex; position: relative; background: var(--soft-pink); border-radius: 50px; padding: 4px; margin-bottom: 25px; }
         .tabs::before {
-            content: "";
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            width: calc(50% - 4px);
-            height: calc(100% - 8px);
-            background: var(--calc-bg);
-            border-radius: 50px;
-            transition: transform 0.4s cubic-bezier(0.5, 1.5, 0.4, 1); 
-            box-shadow: 0 2px 8px rgba(232, 54, 93, 0.15);
-            z-index: 1;
+            content: ""; position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px);
+            background: var(--calc-bg); border-radius: 50px; transition: transform 0.4s cubic-bezier(0.5, 1.5, 0.4, 1); 
+            box-shadow: 0 2px 8px rgba(232, 54, 93, 0.15); z-index: 1;
         }
+        .tabs[data-active="arithmetic"]::before { transform: translateX(100%); }
+        .tab-btn { flex: 1; background: transparent; border: none; padding: 10px 0; font-family: 'Quicksand', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text-soft); cursor: pointer; position: relative; z-index: 2; transition: color 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .tab-btn.active { color: var(--accent-red); }
 
-        .tabs[data-active="arithmetic"]::before {
-            transform: translateX(100%);
-        }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 700; font-size: 0.9em; margin-bottom: 5px; color: #8c6a78; }
+        input { width: 100%; padding: 10px; border: 2px solid var(--soft-pink); border-radius: 12px; font-family: 'Quicksand', sans-serif; font-size: 1rem; color: var(--text-dark); font-weight: 700; }
+        input:focus { outline: none; border-color: var(--dark-pink); }
+        .row { display: flex; gap: 10px; }
 
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 10px 0;
-            font-family: 'Quicksand', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-soft);
-            cursor: pointer;
-            position: relative;
-            z-index: 2;
-            transition: color 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .tab-btn.active {
-            color: var(--accent-red);
-        }
+        .op-selector { display: flex; gap: 8px; margin-bottom: 15px; }
+        .op-btn { flex: 1; background: var(--soft-pink); border: none; border-radius: 12px; padding: 10px 0; font-size: 1.3rem; font-weight: 900; color: var(--text-soft); cursor: pointer; transition: all 0.2s; }
+        .op-btn.active { background: var(--accent-red); color: white; transform: scale(1.05); }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            color: #8c6a78;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid var(--soft-pink);
-            border-radius: 12px;
-            font-family: 'Quicksand', sans-serif;
-            font-size: 1rem;
-            color: var(--text-dark);
-            font-weight: 700;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: var(--dark-pink);
-        }
-
-        .row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .op-selector {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .op-btn {
-            flex: 1;
-            background: var(--soft-pink);
-            border: none;
-            border-radius: 12px;
-            padding: 10px 0;
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: var(--text-soft);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .op-btn.active {
-            background: var(--accent-red);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .arith-inputs {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .op-display {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--accent-red);
-            margin-top: 30px; 
-            flex-shrink: 0;
-        }
-
-        .base-label-small {
-            font-size: 0.75em;
-            margin-top: 8px;
-            margin-bottom: 3px;
-        }
+        .arith-inputs { display: flex; align-items: flex-start; gap: 10px; }
+        .op-display { font-size: 1.5rem; font-weight: 900; color: var(--accent-red); margin-top: 30px; flex-shrink: 0; }
+        .base-label-small { font-size: 0.75em; margin-top: 8px; margin-bottom: 3px; }
 
         .calc-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(to right, #e8365d, #ff6b9d);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 900;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.1s, box-shadow 0.3s;
-            margin-top: 15px;
-            box-shadow: 0 8px 20px rgba(232, 54, 93, 0.3);
+            width: 100%; padding: 14px; background: linear-gradient(to right, #e8365d, #ff6b9d); color: white;
+            border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 900; cursor: pointer;
+            transition: opacity 0.3s, transform 0.1s, box-shadow 0.3s; margin-top: 15px; box-shadow: 0 8px 20px rgba(232, 54, 93, 0.3);
         }
-
-        .calc-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(232, 54, 93, 0.4);
-        }
-
-        .calc-btn:active {
-            transform: translateY(1px);
-        }
+        .calc-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232, 54, 93, 0.4); }
+        .calc-btn:active { transform: translateY(1px); }
 
         .result-box {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff0f5;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark-pink);
-            min-height: 30px;
-            border: 2px dashed var(--primary-pink);
-            overflow-wrap: break-word;
-            word-break: normal;
+            margin-top: 20px; padding: 15px; background-color: #fff0f5; border-radius: 15px; text-align: center;
+            font-size: 1.5rem; font-weight: 700; color: var(--dark-pink); min-height: 30px;
+            border: 2px dashed var(--primary-pink); overflow-wrap: break-word; word-break: normal;
         }
-
-        .result-box.error-text {
-            font-size: 1.1rem;
-            color: var(--accent-red);
-        }
-
+        .result-box.error-text { font-size: 1.1rem; color: var(--accent-red); }
         .hidden { display: none; }
 
-        /* 2. The Sliding Solution Panel (Closed State) */
+        /* Sliding Solution Panel */
         .solution-panel {
-            width: 0;
-            opacity: 0;
-            overflow: hidden;
-            
-            /* Applies the same glass transparency as the calculator */
+            width: 0; opacity: 0; overflow: hidden;
             background-color: rgba(255, 255, 255, 0.3); 
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            
-            border-radius: 25px;
-            border: 0px solid var(--primary-pink);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0;
-            box-shadow: none;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 25px; border: 0px solid var(--primary-pink);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 0; box-shadow: none;
         }
 
-        /* 3. When Active (Drawer Open State) */
         .app-container.show-solution .solution-panel {
-            width: 400px;
-            opacity: 1;
-            padding: 30px;
-            border: 3px solid var(--primary-pink);
-            box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
-            
-            /* NEW: Makes the panel scrollable if it gets taller than 550px */
-            max-height: 550px; 
-            overflow-y: auto; 
+            width: 480px; opacity: 1; padding: 30px; border: 3px solid var(--primary-pink);
+            box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6); max-height: 600px; overflow-y: auto; 
         }
 
-        /* 4. Cute Custom Scrollbar for the panel */
-        .solution-panel::-webkit-scrollbar {
-            width: 8px;
-        }
-        .solution-panel::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            margin-block: 15px; /* Adds padding at top and bottom of track */
-        }
-        .solution-panel::-webkit-scrollbar-thumb {
-            background: var(--dark-pink);
-            border-radius: 10px;
-        }
+        /* Cute Scrollbar */
+        .solution-panel::-webkit-scrollbar { width: 8px; }
+        .solution-panel::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.2); border-radius: 10px; margin-block: 15px; }
+        .solution-panel::-webkit-scrollbar-thumb { background: var(--dark-pink); border-radius: 10px; }
 
-        /* 5. Locks text width so it doesn't "squish" during the animation */
-        .solution-content-wrapper {
-            width: 334px; 
-            font-size: 0.95rem;
-            color: var(--text-dark);
-            line-height: 1.6;
+        .solution-content-wrapper { width: 414px; font-size: 0.95rem; color: var(--text-dark); line-height: 1.6; }
+
+        /* --- NEW: CLEAN MATH STYLING --- */
+        .step-header {
+            color: var(--accent-red); font-weight: 800; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 1.05rem;
         }
         
-        .solution-content-wrapper b {
-            color: var(--accent-red);
+        .sub-header {
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); font-weight: 700; margin-bottom: 5px;
         }
 
-        /* Mobile responsiveness updates */
-        @media (max-width: 850px) {
-            .app-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            .app-container.show-solution .solution-panel {
-                width: 100%;
-                max-width: 400px;
-                margin-top: 10px;
-            }
-            .solution-content-wrapper {
-                width: 100%; 
-            }
-            .calculator { padding: 20px; }
-            h1 { font-size: 2rem; }
-            .bow { font-size: 1.8rem; }
-            .subtitle { font-size: 0.85rem; }
-            .op-display { margin-top: 28px; font-size: 1.3rem; }
+        /* Makes equations look like a real calculator receipt */
+        .math-block {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--soft-pink);
+            border-radius: 10px; padding: 12px; margin-bottom: 12px;
+            font-size: 0.9rem; color: var(--text-mid); word-break: break-word;
+        }
+        
+        /* Flex rows to align division math on the left, and remainders on the right */
+        .math-row {
+            font-family: 'Consolas', 'Courier New', monospace;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--soft-pink);
+            border-bottom: none;
+            padding: 8px 12px; font-size: 0.9rem; color: var(--text-mid);
+        }
+        
+        .math-row:first-of-type { border-top-left-radius: 10px; border-top-right-radius: 10px; }
+        .math-row:last-of-type { border-bottom: 1px solid var(--soft-pink); border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; margin-bottom: 12px;}
+
+        /* Pills for the converted letters/numbers */
+        .rem-box {
+            background-color: var(--soft-pink);
+            color: var(--text-dark);
+            padding: 3px 10px; border-radius: 12px; font-size: 0.85rem;
+        }
+        .rem-box strong { color: var(--accent-red); margin-left: 5px; font-size: 1rem;}
+
+        @media (max-width: 950px) {
+            .app-container { flex-direction: column; align-items: center; }
+            .app-container.show-solution .solution-panel { width: 100%; max-width: 450px; margin-top: 10px; }
+            .solution-content-wrapper { width: 100%; }
         }
     </style>
 </head>
@@ -455,19 +261,16 @@
         </div>
 
         <button class="calc-btn" onclick="calculate()">Calculate 🎀</button>
-
         <div class="result-box" id="result">...</div>
-
-        <!-- NEW TOGGLE BUTTON (Hidden by default) -->
         <button id="toggle-sol-btn" class="calc-btn" onclick="toggleSolution()" style="display: none; background: var(--dark-pink); font-size: 1rem; margin-top: 15px; padding: 10px;">
             See complete solution 🔍
         </button>
     </div>
 
-    <!-- NEW SLIDING SOLUTION PANEL -->
+    <!-- Sliding Solution Panel -->
     <div class="solution-panel">
         <div class="solution-content-wrapper">
-            <h2 style="color: var(--accent-red); margin-top: 0; font-size: 1.5rem;">Steps</h2>
+            <h2 style="color: var(--accent-red); margin-top: 0; font-size: 1.5rem; text-align: center; border-bottom: 2px dashed var(--soft-pink); padding-bottom: 10px;">Solution Steps</h2>
             <div id="solution-content"></div>
         </div>
     </div>
@@ -477,7 +280,6 @@
 <script>
     function setMode(mode) {
         document.getElementById('mode').value = mode;
-        
         const tabs = document.getElementById('mode-tabs');
         tabs.setAttribute('data-active', mode);
         
@@ -500,12 +302,10 @@
     function selectOp(btn, op) {
         document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
         document.getElementById('operator').value = op;
         document.getElementById('op-disp').innerText = btn.innerText;
     }
 
-    // Handles sliding the panel open and changing the button text
     function toggleSolution() {
         const appContainer = document.getElementById('app-container');
         const btn = document.getElementById('toggle-sol-btn');
@@ -522,7 +322,6 @@
     async function calculate() {
         const mode = document.getElementById('mode').value;
         const out_base = document.getElementById('out_base').value;
-        
         const payload = { mode, out_base };
 
         if (mode === 'convert') {
@@ -542,8 +341,6 @@
         const appContainer = document.getElementById('app-container');
         
         resBox.innerText = "Calculating...";
-        
-        // Hide the toggle button and close the drawer if they calculate a new problem
         toggleBtn.style.display = 'none';
         appContainer.classList.remove('show-solution');
         toggleBtn.innerText = "See complete solution 🔍";
@@ -559,8 +356,6 @@
             if (data.success) {
                 resBox.innerText = data.result;
                 resBox.classList.remove('error-text'); 
-                
-                // Load the HTML steps into the hidden drawer and reveal the button
                 solContent.innerHTML = data.steps; 
                 toggleBtn.style.display = 'block'; 
             } else {
