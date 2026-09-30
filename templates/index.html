@@ -128,7 +128,7 @@
             width: 100%; 
             max-width: 400px; 
             border: 3px solid var(--primary-pink);
-            flex-shrink: 0; /* Prevents calculator from shrinking */
+            flex-shrink: 0; 
         }
 
         .tabs {
@@ -311,7 +311,12 @@
             width: 0;
             opacity: 0;
             overflow: hidden;
-            background-color: rgba(255, 255, 255, 0.85); 
+            
+            /* Applies the same glass transparency as the calculator */
+            background-color: rgba(255, 255, 255, 0.3); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            
             border-radius: 25px;
             border: 0px solid var(--primary-pink);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -326,9 +331,27 @@
             padding: 30px;
             border: 3px solid var(--primary-pink);
             box-shadow: 0 10px 25px rgba(255, 183, 197, 0.6);
+            
+            /* NEW: Makes the panel scrollable if it gets taller than 550px */
+            max-height: 550px; 
+            overflow-y: auto; 
         }
 
-        /* 4. Locks text width so it doesn't "squish" during the animation */
+        /* 4. Cute Custom Scrollbar for the panel */
+        .solution-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        .solution-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-block: 15px; /* Adds padding at top and bottom of track */
+        }
+        .solution-panel::-webkit-scrollbar-thumb {
+            background: var(--dark-pink);
+            border-radius: 10px;
+        }
+
+        /* 5. Locks text width so it doesn't "squish" during the animation */
         .solution-content-wrapper {
             width: 334px; 
             font-size: 0.95rem;
